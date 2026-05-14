@@ -57,9 +57,8 @@ Antes de começar, você vai precisar ter instalado em sua máquina:
 
     Clone o repositório:
     Bash
-
-    git clone https://github.com/seu-usuario/siga.git
-
+    git clone https://github.com/wesleysemende133/Sistema_academico.git
+    
     Configure o banco de dados:
     O projeto utiliza o Spring Boot Docker Compose. Se tiver o Docker instalado, a base de dados subirá automaticamente ao iniciar a aplicação. Caso contrário, configure o application.properties com as credenciais do seu Postgres local.
 
