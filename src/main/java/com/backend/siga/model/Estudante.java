@@ -3,9 +3,11 @@ package com.backend.siga.model;
 import java.time.LocalDate;
 
 import com.backend.siga.model.atributos.DocumentoIdentificacao;
+import com.backend.siga.model.atributos.Email;
 import com.backend.siga.model.atributos.Endereco;
 import com.backend.siga.model.enums.Sexo;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
@@ -36,8 +38,15 @@ public class Estudante {
     @Column(nullable = false, length = 150)
     private String nome;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    /**
+     * Email agora é um objeto de valor embutido.
+     *
+     * @AttributeOverride garante que o valor interno 'valor'
+     * seja persistido na coluna 'email' com as restrições corretas.
+     */
+    @Embedded
+    @AttributeOverride(name = "valor", column = @Column(name = "email", unique = true, nullable = false, length = 150))
+    private Email email;
 
     @Column(nullable = false)
     private LocalDate dataNascimento; 
