@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * Representa um endereço de email válido como um objeto de valor.
@@ -21,6 +23,9 @@ public class Email {
     );
 
     @Column(nullable = false, unique = true, length = MAX_LENGTH)
+    @NotBlank(message = "O email não pode estar vazio")
+    @Size(max = MAX_LENGTH, message = "O email não pode ter mais de " + MAX_LENGTH + " caracteres")
+    @jakarta.validation.constraints.Email(message = "Formato de email inválido")
     private String valor;
 
     protected Email() {
