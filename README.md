@@ -1,71 +1,143 @@
-# Sistema_academico
-SGA - Sistema de Gestão Académica
 
-O SGA é uma plataforma robusta e escalável concebida para a digitalização integral de instituições de ensino. O sistema centraliza operações administrativas, pedagógicas e financeiras, permitindo uma gestão eficiente e transparente do percurso académico, desde a matrícula inicial até à graduação.
-🚀 Funcionalidades Principais
-🏛️ Gestão Administrativa
+ SIGA
 
-    Controle de Matrículas: Processamento digital de inscrições e renovações.
+## 1. Visão Geral do Sistema
 
-    Gestão de Turmas: Organização de horários, salas e alocação de docentes.
+O **SIGA (Sistema de Gestão Acadêmica)** é uma API REST desenvolvida para centralizar, automatizar e simplificar as operações diárias de uma instituição de ensino. O sistema gerencia desde o controle de acesso de diferentes níveis de usuários até o ciclo de vida acadêmico do estudante (matrículas, notas, turmas e frequências).
 
-    Emissão de Documentos: Geração de declarações, certificados e históricos escolares com validação digital.
+---
 
-📖 Gestão Pedagógica
+## 2. Requisitos do Sistema
 
-    Lançamento de Notas: Registro automatizado de avaliações, exames e cálculo de médias.
+### 📌 Requisitos Funcionais (RF)
 
-    Diário de Classe: Controle de assiduidade (faltas) e registro de sumários pelos docentes.
+Os requisitos funcionais definem o que o sistema *deve fazer*.
 
-    Portal do Aluno: Acesso em tempo real a notas, horários e materiais de apoio.
+* **RF-001 (Autenticação):** O sistema deve permitir o login de usuários gerando um token JWT contendo suas permissões (*Roles*).
+* **RF-002 (Gestão de Usuários):** O administrador deve ser capaz de cadastrar Professores e Alunos. O sistema deve criar automaticamente as credenciais de acesso vinculadas a eles.
+* **RF-003 (Gestão de Cursos e Disciplinas):** O sistema deve permitir o mapeamento de Cursos e suas respectivas Disciplinas com carga horária.
+* **RF-004 (Alocação de Turmas):** O sistema deve permitir criar Turmas para um período letivo, vinculando uma Disciplina a um Professor.
+* **RF-005 (Matrícula):** O sistema deve permitir a inscrição de Alunos em Turmas ativas.
+* **RF-006 (Lançamento Acadêmico):** O professor da turma deve conseguir lançar notas (Avaliações) e registrar faltas (Frequência) dos alunos matriculados na sua turma.
+* **RF-007 (Boletim/Histórico):** O aluno deve ser capaz de visualizar suas notas, médias e situação final em cada disciplina instalada.
 
-💰 Gestão Financeira
+### ⚙️ Requisitos Não-Funcionais (RNF)
 
-    Controle de Propinas: Monitoramento de pagamentos, multas e isenções.
+Os requisitos não-funcionais definem *como* o sistema deve operar.
 
-    Integração Fintech: Pagamentos facilitados via Mobile Money (M-Pesa, e-Mola) e referências bancárias.
+* **RNF-001 (Segurança):** Senhas devem ser obrigatoriamente criptografadas utilizando o algoritmo **BCrypt** antes de persistidas no banco de dados.
+* **RNF-002 (Arquitetura da API):** A API deve ser estritamente RESTful, utilizando os verbos HTTP corretos (`GET`, `POST`, `PUT`, `DELETE`) e retornando códigos de status padronizados (`200 OK`, `201 Created`, `400 Bad Request`, `403 Forbidden`, `404 Not Found`).
+* **RNF-003 (Performance/Persistência):** Utilização do Spring Data JPA com estratégias de carregamento preguiçoso (*Lazy Loading*) para evitar consultas desnecessárias ao banco de dados.
+* **RNF-004 (Portabilidade/Deploy):** O projeto deve conter um `Dockerfile` configurado para facilitar o build multi-stage e deploy automatizado em plataformas como **Render** ou **Railway**.
 
-    Relatórios: Dashboards financeiros para análise de receitas e inadimplência.
+---
 
-🛠️ Stack Tecnológica
+## 3. Arquitetura de Software e Camadas
 
-O projeto utiliza o que há de mais moderno no ecossistema Java para garantir alta performance e segurança:
+A aplicação segue a arquitetura padrão de mercado baseada em camadas especializadas, garantindo o princípio da **Responsabilidade Única (SOLID)**:
 
-    Linguagem: Java 21 (LTS) com foco em Virtual Threads.
+```
+[Client: React] 
+       │ (Requisição HTTP + Bearer Token)
+       ▼
+[Controller Layer] ──► Valida a entrada com @Valid (DTOs)
+       │
+       ▼
+[Service Layer] ───► Onde reside a Regra de Negócio (Validações, Cálculos de Média)
+       │
+       ▼
+[Repository Layer] ─► Interfaces que estendem JpaRepository (Consultas ao Banco)
+       │
+       ▼
+[Database: PostgreSQL/MySQL]
 
-    Framework: Spring Boot 4.0.x.
+```
 
-    Persistência: Spring Data JPA e Hibernate.
+---
 
-    Base de Dados: PostgreSQL.
+## 4. Modelagem de Dados (Entidades)
 
-    Segurança: Spring Security + JWT (JSON Web Token).
+Para garantir performance e isolamento de escopo, separamos a entidade de autenticação das entidades de negócio.
 
-    Ferramentas: Lombok, Docker e Maven.
+```
+       ┌────────────────┐
+       │    Usuario     │ (Id, Email, Senha, Role)
+       └───────┬────────┘
+               │
+      ┌────────┴────────┐
+      │1                │1
+┌─────▼─────┐     ┌─────▼─────┐
+│  Professor│     │   Aluno   │
+└─────┬─────┘     └─────┬─────┘
+      │1                │*
+      │                 │
+      │*                │*
+┌─────▼─────┐     ┌─────▼──────────┐
+│   Turma   │◄────┤ MatriculaTurma │ (Notas, Frequência, Status)
+└─────▲─────┘     └────────────────┘
+      │*
+      │1
+┌─────┴─────┐
+│ Disciplina│
+└─────▲─────┘
+      │*
+      │1
+┌─────┴─────┐
+│   Curso   │
+└───────────┘
 
-⚙️ Pré-requisitos
+```
 
-Antes de começar, você vai precisar ter instalado em sua máquina:
+---
 
-    JDK 21
+## 5. Especificação da API (Endorpoints Principais)
 
-    Maven 3.9+
+Todos os endpoints (exceto o de login) exigem o cabeçalho `Authorization: Bearer <TOKEN>`.
 
-    Docker (opcional, para a base de dados)
+### Autenticação (`/api/v1/auth`)
 
-🔧 Instalação e Execução
+* `POST /login` -> Autentica um usuário e retorna o token JWT.
 
-    Clone o repositório:
-    Bash
-    git clone https://github.com/wesleysemende133/Sistema_academico.git
-    
-    Configure o banco de dados:
-    O projeto utiliza o Spring Boot Docker Compose. Se tiver o Docker instalado, a base de dados subirá automaticamente ao iniciar a aplicação. Caso contrário, configure o application.properties com as credenciais do seu Postgres local.
+### Administração (`/api/v1/admin`) -> *Apenas `ROLE_ADMIN*`
 
-    Compile e execute a aplicação:
-    Bash
+* `POST /alunos` -> Cadastra um novo aluno (e cria seu respectivo Usuário).
+* `POST /professores` -> Cadastra um novo professor.
+* `POST /cursos` -> Cria um novo curso.
+* `POST /disciplinas` -> Cria uma disciplina atrelada a um curso.
 
-    mvn spring-boot:run
+### Acadêmico / Professores (`/api/v1/professor`) -> *Apenas `ROLE_PROFESSOR*`
+
+* `GET /turmas` -> Lista as turmas atribuídas ao professor logado.
+* `PUT /turmas/{turmaId}/notas` -> Lança ou atualiza as notas dos alunos daquela turma.
+* `PUT /turmas/{turmaId}/frequencia` -> Registra faltas de um estudante.
+
+### Estudantes (`/api/v1/aluno`) -> *Apenas `ROLE_ALUNO*`
+
+* `GET /boletim` -> Retorna as notas, faltas e o status do aluno logado em todas as disciplinas do período corrente.
+* `POST /matricula-turma` -> Realiza a inscrição em uma turma disponível.
+
+---
+
+## 6. Erros Comuns no Desenvolvimento e Como Evitá-los (Dica Sênior)
+
+Ao iniciar o código do seu SIGA, preste atenção nestes pontos críticos para evitar refatorações dolorosas no futuro:
+
+1. **Problema do Loop Infinito no JSON:** Como `Aluno` tem `Usuario` e `Usuario` pode fazer referência reversa, se você retornar a Entidade diretamente no Controller, o Jackson (conversor de JSON) entrará em loop infinito.
+* *Como evitar:* **Use DTOs (Records)**. Nunca retorne a entidade mapeada do banco diretamente no Controller.
+
+
+2. **Vazamento de Senhas:** Retornar o hash da senha do usuário em requisições de listagem.
+* *Como evitar:* No DTO de resposta de usuários, nunca mapeie ou inclua o campo `senha`.
+
+
+3. **Configuração Incorreta de CORS em Produção:** Permitir `*` (qualquer origem) em produção ou esquecer de liberar os métodos `OPTIONS` que o navegador envia antes do `POST`.
+* *Como evitar:* Criar uma classe `@Configuration` dedicada ao CORS mapeando explicitamente a URL do seu front-end React.
+
+
+---
+
+Esta documentação serve como o mapa do nosso projeto. Com ela aprovada, podemos começar a codificar a base de forma limpa e estruturada.
+
 
 📄 Licença
 
