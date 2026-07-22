@@ -1,31 +1,3 @@
-```markdown
-# 🎓 SIGA - Sistema de Gestão Acadêmica
-
-**Versão Alpha 0.1**
-
-[![Java](https://img.shields.io/badge/Java-21-blue.svg)](https://adoptium.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.0.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18.4-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
----
-
-## 📋 Índice
-
-- [Visão Geral](#visão-geral-do-sistema)
-- [Requisitos do Sistema](#requisitos-do-sistema)
-- [Arquitetura](#arquitetura-de-software-e-camadas)
-- [Modelagem de Dados](#modelagem-de-dados-entidades)
-- [Tecnologias](#tecnologias)
-- [API Endpoints](#especificação-da-api-endpoints-principais)
-- [Como Executar](#como-executar)
-- [Testes da API](#testes-da-api)
-- [Erros Comuns](#erros-comuns-no-desenvolvimento-e-como-evitá-los)
-- [Roadmap](#roadmap-próximos-passos)
-- [Contribuição](#contribuição)
-- [Licença](#licença)
-
----
 
 ## 📚 Visão Geral do Sistema
 
